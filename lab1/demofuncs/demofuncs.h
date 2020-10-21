@@ -1,6 +1,8 @@
 #pragma once
 
 #include <chrono>
+#include <stdexcept>
+#include <string>
 #include <thread>
 #include <utility>
 
@@ -10,6 +12,35 @@ namespace spos::lab1::demo {
 	using std::pair;
 
 	enum class op_group { AND, OR, INT, DOUBLE };
+
+	std::string to_string(op_group group) {
+        switch (group) {
+            case op_group::AND:
+                return "AND";
+                break;
+            case op_group::OR:
+                return "OR";
+                break;
+            case op_group::INT:
+                return "INT";
+                break;
+            default:
+                return "DOUBLE";
+        }
+	}
+
+	op_group get_group(std::string group_str) {
+	    if (group_str == to_string(op_group::AND)) {
+            return op_group::AND;
+        } else if (group_str == to_string(op_group::OR)) {
+            return op_group::OR;
+	    } else if (group_str == to_string(op_group::INT)) {
+	        return op_group::INT;
+	    } else if (group_str == to_string(op_group::DOUBLE)) {
+	        return op_group::DOUBLE;
+	    }
+        throw new std::invalid_argument("Unknown operation group.");
+	}
 
 	template <typename T>
 	struct func_info_holder {
@@ -28,6 +59,7 @@ namespace spos::lab1::demo {
 			{ pair{true, 5s}, pair{true, 10s}, pair{false, 10s}, pair{false, INF_TIME}, pair{true, 10s}, pair{false, INF_TIME} };;
 		static constexpr case_type g_tests[CASES_NUM] =
 			{ pair{true, 10s}, pair{true, 5s}, pair{false, INF_TIME}, pair{false, 10s}, pair{false, INF_TIME}, pair{true, 10s} };
+		static constexpr bool ZERO = false;
 	};
 
 
@@ -37,6 +69,7 @@ namespace spos::lab1::demo {
 			{ pair{true, 5s}, pair{true, 10s}, pair{false, 10s}, pair{false, INF_TIME}, pair{true, 10s}, pair{false, INF_TIME} };
 		static constexpr case_type g_tests[CASES_NUM] =
 			{ pair{true, 10s}, pair{true, 5s}, pair{false, INF_TIME}, pair{false, 10s}, pair{false, INF_TIME}, pair{true, 10s} };
+        static constexpr bool ZERO = false;
 	};
 
 	template<>
@@ -45,6 +78,7 @@ namespace spos::lab1::demo {
 			{ pair{7, 5s}, pair{7, 10s}, pair{0, 10s}, pair{0, INF_TIME}, pair{7, 10s}, pair{0, INF_TIME} };
 		static constexpr case_type g_tests[CASES_NUM] =
 			{ pair{3, 10s}, pair{3, 5s}, pair{0, INF_TIME}, pair{0, 10s}, pair{0, INF_TIME}, pair{3, 10s} };
+        static constexpr int ZERO = 0;
 	};
 
 	template<>
@@ -53,6 +87,7 @@ namespace spos::lab1::demo {
 			{ pair{7., 5s}, pair{7., 10s}, pair{0., 10s}, pair{0., INF_TIME}, pair{7., 10s}, pair{0., INF_TIME} };
 		static constexpr case_type g_tests[CASES_NUM] =
 			{ pair{3., 10s}, pair{3., 5s}, pair{0., INF_TIME}, pair{0., 10s}, pair{0., INF_TIME}, pair{3., 10s} };
+        static constexpr double ZERO = 0.;
 	};
 
 	template <op_group group>
