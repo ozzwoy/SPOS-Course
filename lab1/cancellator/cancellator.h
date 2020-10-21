@@ -9,7 +9,9 @@ class cancellator {
 public:
     virtual void start() = 0;
 
-    virtual bool is_shutdown_process_on() = 0;
+    virtual bool has_prompt() = 0;
+
+    virtual bool is_prompt_on() = 0;
 
     virtual bool is_cancelled() = 0;
 

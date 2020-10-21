@@ -13,6 +13,7 @@
 #include <chrono>
 #include <iostream>
 #include <string>
+#include <xutility>
 namespace bp = boost::process;
 
 template <spos::lab1::demo::op_group Group>
@@ -27,10 +28,11 @@ private:
 
     void on_hangs(std::string const &hang_func, std::string const &non_hang_func, data_type value,
                   time_point start, time_point end) {
-        std::cout << ((value == ZERO) ? ("0. " + non_hang_func + "() returns 0, short-circuit operation.") :
-                      ("undefined. " + hang_func + "() hangs."));
+        std::cout << "Result: ";
+        std::cout << ((value == ZERO) ? ("zero. " + non_hang_func + "() returns zero value, short-circuit operation.") :
+                                        ("undefined. " + hang_func + "() hangs."));
         std::cout << "\nElapsed time: " <<
-                  std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms.";
+                  std::chrono::duration_cast<std::chrono::seconds>(end - start).count() << "s.";
     }
 
     void on_cancelled(bp::child &f_proc, bp::ipstream &fout, bp::child &g_proc, bp::ipstream &gout,
@@ -38,7 +40,9 @@ private:
         data_type f_value, g_value;
 
         if (f_proc.running() && g_proc.running()) {
-            std::cout << "undefined. Both f() and g() hang.";
+            std::cout << "Result: undefined. Both f() and g() hang.";
+            std::cout << "\nElapsed time: " <<
+                      std::chrono::duration_cast<std::chrono::seconds>(end - start).count() << "s.";
         } else if (f_proc.running()) {
             gout >> g_value;
             on_hangs("f", "g", g_value, start, end);
@@ -49,29 +53,27 @@ private:
             fout >> f_value;
             gout >> g_value;
             group_operation::group_operation<Group> operation;
-            std::cout << operation.execute(f_value, g_value);
+            std::cout << "Result: " << operation.execute(f_value, g_value);
             std::cout << "\nElapsed time: " <<
-                    std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms.";
+                    std::chrono::duration_cast<std::chrono::seconds>(end - start).count() << "s.";
         }
-
-        f_proc.terminate();
-        g_proc.terminate();
     }
 
     void on_returns_zero(std::string const &func, time_point start, time_point end) {
-        while (_cancellator->is_shutdown_process_on());
+        if (_cancellator->has_prompt()) while (_cancellator->is_prompt_on());
         _cancellator->finish();
-        system("cls");
-        std::cout << "0. " + func + "() returns 0, short-circuit operation.";
+        std::cout << "Result: " << "zero. " + func + "() returns zero value, short-circuit operation.";
         std::cout << "\nElapsed time: " <<
-                  std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << "ms.";
+                  std::chrono::duration_cast<std::chrono::seconds>(end - start).count() << "s.";
     }
 
 public:
     manager(std::string f_path, std::string g_path, cancellator* _cancellator = nullptr) :
             _cancellator(_cancellator), f_path(std::move(f_path)), g_path(std::move(g_path)) {
-        if (!_cancellator) this->_cancellator = new simple_cancellator('q');
+        if (!_cancellator) this->_cancellator = new simple_cancellator();
     }
+
+    virtual ~manager() { delete _cancellator; }
 
     void run(int x) {
         bp::opstream fin, gin;
@@ -80,7 +82,7 @@ public:
         data_type f_value, g_value;
         bool f_read = false;
 
-        std::chrono::time_point<std::chrono::system_clock> start, end;
+        time_point start, end;
 
         fin << spos::lab1::demo::to_string(Group) << std::endl << x << std::endl;
         gin << spos::lab1::demo::to_string(Group) << std::endl << x << std::endl;
@@ -89,15 +91,12 @@ public:
         bp::child g_proc(g_path, bp::std_out > gout, bp::std_in < gin);
 
         _cancellator->start();
-        std::cout << "Computation runs. Wait for result.\nResult: ";
+        std::cout << "Computation runs. Wait for result..." << std::endl;
         start = std::chrono::system_clock::now();
-
         while (f_proc.running() && g_proc.running() && !_cancellator->is_cancelled());
-
         end = std::chrono::system_clock::now();
 
         if (_cancellator->is_cancelled()) {
-            system("cls");
             on_cancelled(f_proc, fout, g_proc, gout, start, end);
             return;
         } else {
@@ -121,19 +120,17 @@ public:
         end = std::chrono::system_clock::now();
 
         if (_cancellator->is_cancelled()) {
-            system("cls");
             on_cancelled(f_proc, fout, g_proc, gout, start, end);
             return;
         } else {
-            while (_cancellator->is_shutdown_process_on());
+            if (_cancellator->has_prompt()) while (_cancellator->is_prompt_on());
             _cancellator->finish();
-            system("cls");
 
             if (f_read) gout >> g_value;
             else fout >> f_value;
 
             group_operation::group_operation<Group> operation;
-            std::cout << operation.execute(f_value, g_value);
+            std::cout << "Result: " << operation.execute(f_value, g_value);
             std::cout << "\nElapsed time: " <<
                       std::chrono::duration_cast<std::chrono::seconds>(end - start).count() << "s.";
         }
