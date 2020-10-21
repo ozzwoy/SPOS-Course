@@ -17,19 +17,16 @@ namespace spos::lab1::demo {
         switch (group) {
             case op_group::AND:
                 return "AND";
-                break;
             case op_group::OR:
                 return "OR";
-                break;
             case op_group::INT:
                 return "INT";
-                break;
             default:
                 return "DOUBLE";
         }
 	}
 
-	op_group get_group(std::string group_str) {
+	op_group get_group(std::string const &group_str) {
 	    if (group_str == to_string(op_group::AND)) {
             return op_group::AND;
         } else if (group_str == to_string(op_group::OR)) {
@@ -39,7 +36,7 @@ namespace spos::lab1::demo {
 	    } else if (group_str == to_string(op_group::DOUBLE)) {
 	        return op_group::DOUBLE;
 	    }
-        throw new std::invalid_argument("Unknown operation group.");
+        throw std::invalid_argument("Unknown operation group.");
 	}
 
 	template <typename T>
