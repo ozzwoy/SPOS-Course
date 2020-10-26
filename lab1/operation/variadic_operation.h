@@ -5,44 +5,49 @@
 #ifndef SPOS_LAB_1_VARIADIC_OPERATION_H
 #define SPOS_LAB_1_VARIADIC_OPERATION_H
 
+#include "../function/demofuncs.h"
 #include <algorithm>
-#include <initializer_list>
 #include <numeric>
+#include <vector>
 
 namespace variadic_operation {
 
-    template <typename T>
-    struct variadic_operation {
-        virtual T execute(std::initializer_list<T> arg_list) = 0;
-    };
+    template <spos::lab1::demo::op_group group>
+    struct variadic_operation;
 
-    struct conjunction : public variadic_operation<bool> {
-        bool execute(std::initializer_list<bool> arg_list) override {
-            for (bool arg : arg_list) {
-                if (!arg) return false;
-            }
-            return true;
+    template<>
+    struct variadic_operation<spos::lab1::demo::op_group::AND> {
+        bool execute(std::vector<bool> const &args) {
+            return std::ranges::all_of(args.begin(), args.end(), [](bool v){ return v; });
         }
     };
 
-    struct disjunction : public variadic_operation<bool> {
-        bool execute(std::initializer_list<bool> arg_list) override {
-            for (bool arg : arg_list) {
-                if (arg) return true;
-            }
-            return false;
+    template<>
+    struct variadic_operation<spos::lab1::demo::op_group::OR> {
+        bool execute(std::vector<bool> args) {
+            return std::ranges::any_of(args.begin(), args.end(), [](bool v){ return v; });
         }
     };
 
-    struct minimum : public variadic_operation<int> {
-        int execute(std::initializer_list<int> arg_list) override {
-            return std::min(arg_list);
+    template<>
+    struct variadic_operation<spos::lab1::demo::op_group::INT> {
+        virtual int execute(std::vector<int> args) = 0;
+    };
+
+    struct min : public variadic_operation<spos::lab1::demo::op_group::INT> {
+        int execute(std::vector<int> args) override {
+            return *std::min_element(args.begin(), args.end());
         }
     };
 
-    struct multiply : public variadic_operation<double> {
-        double execute(std::initializer_list<double> arg_list) override {
-            return std::accumulate(arg_list.begin(), arg_list.end(), 1,
+    template<>
+    struct variadic_operation<spos::lab1::demo::op_group::DOUBLE> {
+        virtual double execute(std::vector<double> args) = 0;
+    };
+
+    struct multiply : public variadic_operation<spos::lab1::demo::op_group::DOUBLE> {
+        double execute(std::vector<double> args) override {
+            return std::accumulate(args.begin(), args.end(), 1,
                                    [](double left, double right) { return left * right; });
         }
     };

@@ -78,14 +78,17 @@ public:
         if (!_cancellator) this->_cancellator = new simple_cancellator();
     }
 
-    virtual ~basic_manager() { delete _cancellator; }
+    virtual ~basic_manager() {
+        delete operation;
+        delete _cancellator;
+    }
 
     void run(int x) {
         bp::opstream fin, gin;
         bp::ipstream fout, gout;
 
         data_type f_value, g_value;
-        bool f_read = false;
+        bool f_ready = false;
 
         time_point start, end;
 
@@ -117,7 +120,7 @@ public:
                     on_returns_zero("f", start, end);
                     return;
                 }
-                f_read = true;
+                f_ready = true;
             }
         }
 
@@ -133,7 +136,7 @@ public:
             }
             _cancellator->finish();
 
-            if (f_read) gout >> g_value;
+            if (f_ready) gout >> g_value;
             else fout >> f_value;
 
             std::cout << "Result: " << operation->execute(f_value, g_value) << std::endl <<
