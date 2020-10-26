@@ -39,7 +39,7 @@ void extended_test() {
 }
 
 int main() {
-    //basic_test();
-    extended_test();
+    basic_test();
+    //extended_test();
     return 0;
 }

@@ -29,7 +29,7 @@ private:
     std::string exe_path;
     size_t num_of_funcs;
     std::vector<data_type> values;
-    std::vector<bool> f_ready;
+    std::vector<bool> read;
     varop::variadic_operation<Group>* operation;
     cancellator* _cancellator;
 
@@ -42,15 +42,17 @@ private:
     }
 
     void show_result(long elapsed_time, bool short_circuit, bool is_cancelled) {
-        if (_cancellator->has_prompt()) {
-            while (_cancellator->is_prompt_on());
+        if (!is_cancelled) {
+            if (_cancellator->has_prompt()) {
+                while (_cancellator->is_prompt_on());
+            }
+            _cancellator->finish();
         }
-        _cancellator->finish();
 
         std::cout << std::endl;
 
         for (size_t i = 0; i < num_of_funcs; i++) {
-            if (f_ready[i]) on_returns(i);
+            if (read[i]) on_returns(i);
             else on_hangs(i);
         }
 
@@ -63,14 +65,14 @@ private:
             std::cout << "Result: " << operation->execute(values) << std::endl;
         }
 
-        std::cout << "Elapsed time: " << elapsed_time << "ms" << std::endl;
+        std::cout << "Elapsed time: " << elapsed_time << "s" << std::endl;
     }
 
 public:
     extended_manager(std::vector<std::string> const &func_names, std::string exe_path,
                   varop::variadic_operation<Group>* operation, cancellator* _cancellator = nullptr) :
             operation(operation), _cancellator(_cancellator), func_names(func_names), exe_path(std::move(exe_path)),
-            values(func_names.size()), f_ready(func_names.size(), false){
+            values(func_names.size()), read(func_names.size(), false){
         if (func_names.empty()) {
             throw std::invalid_argument("You passed no functions to manager.");
         }
@@ -104,20 +106,18 @@ public:
         start = std::chrono::system_clock::now();
 
         std::vector<size_t> ready_func_nums;
-        std::vector<bool> done(num_of_funcs, false);
         size_t num_ready = 0;
 
         while (true) {
             ready_func_nums.clear();
 
             for (size_t i = 0; i < processes.size(); i++) {
-                if (!processes[i].running() && !done[i]) {
+                if (!processes[i].running() && !read[i]) {
                     data_type result;
                     fout[i] >> result;
                     values[i] = result;
-                    f_ready[i] = true;
+                    read[i] = true;
                     ready_func_nums.push_back(i);
-                    done[i] = true;
                     num_ready++;
                 }
             }

@@ -32,6 +32,8 @@ namespace variadic_operation {
     template<>
     struct variadic_operation<spos::lab1::demo::op_group::INT> {
         virtual int execute(std::vector<int> args) = 0;
+
+        virtual ~variadic_operation() {}
     };
 
     struct min : public variadic_operation<spos::lab1::demo::op_group::INT> {
@@ -43,6 +45,8 @@ namespace variadic_operation {
     template<>
     struct variadic_operation<spos::lab1::demo::op_group::DOUBLE> {
         virtual double execute(std::vector<double> args) = 0;
+
+        virtual ~variadic_operation() {}
     };
 
     struct multiply : public variadic_operation<spos::lab1::demo::op_group::DOUBLE> {

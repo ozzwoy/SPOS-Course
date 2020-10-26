@@ -31,6 +31,8 @@ namespace binary_operation {
     template <>
     struct binary_operation<df::op_group::INT> {
         virtual int execute(int first, int second) = 0;
+
+        virtual ~binary_operation() {}
     };
 
     struct min : public binary_operation<df::op_group::INT> {
@@ -42,6 +44,8 @@ namespace binary_operation {
     template <>
     struct binary_operation<df::op_group::DOUBLE> {
         virtual double execute(double first, double second) = 0;
+
+        virtual ~binary_operation() {}
     };
 
     struct multiplication : public binary_operation<df::op_group::DOUBLE> {
