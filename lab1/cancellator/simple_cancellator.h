@@ -6,6 +6,7 @@
 #define SPOS_LAB_1_SIMPLE_CANCELLATOR_H
 
 #include "cancellator.h"
+#include <iostream>
 #include <thread>
 #include <WinUser.h>
 
@@ -16,7 +17,10 @@ private:
 
     void run() {
         while (!_is_off && !(GetKeyState(VK_ESCAPE) & 0x8000));
-        if (!_is_off) _is_cancelled = true;
+        if (!_is_off) {
+            _is_cancelled = true;
+            std::cout << std::endl << "Computation stopped." << std::endl;
+        }
     }
 
 public:

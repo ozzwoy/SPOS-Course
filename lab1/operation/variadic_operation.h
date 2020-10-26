@@ -9,7 +9,7 @@
 #include <initializer_list>
 #include <numeric>
 
-namespace var_operation {
+namespace variadic_operation {
 
     template <typename T>
     struct variadic_operation {

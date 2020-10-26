@@ -1,40 +1,62 @@
 //
-// Created by Citrus on 18.10.2020.
+// Created by Citrus on 19.10.2020.
 //
 
 #ifndef SPOS_LAB_1_BINARY_OPERATION_H
 #define SPOS_LAB_1_BINARY_OPERATION_H
 
+#include "../function/demofuncs.h"
 #include <algorithm>
+namespace df = spos::lab1::demo;
 
-namespace bin_operation {
+namespace binary_operation {
 
-    template <typename T>
-    struct binary_operation {
-        virtual T execute(T first, T second) = 0;
-    };
+    template <df::op_group group>
+    struct binary_operation;
 
-    struct conjunction : public binary_operation<bool> {
-        bool execute(bool first, bool second) override {
+    template <>
+    struct binary_operation<df::op_group::AND> {
+        bool execute(bool first, bool second) {
             return first && second;
         }
     };
 
-    struct disjunction : public binary_operation<bool> {
-        bool execute(bool first, bool second) override {
+    template <>
+    struct binary_operation<df::op_group::OR> {
+        bool execute(bool first, bool second) {
             return first || second;
         }
     };
 
-    struct minimum : public binary_operation<int> {
+    template <>
+    struct binary_operation<df::op_group::INT> {
+        virtual int execute(int first, int second) = 0;
+    };
+
+    struct min : public binary_operation<df::op_group::INT> {
         int execute(int first, int second) override {
             return std::min(first, second);
         }
     };
 
-    struct multiply : public binary_operation<double> {
+    template <>
+    struct binary_operation<df::op_group::DOUBLE> {
+        virtual double execute(double first, double second) = 0;
+    };
+
+    struct multiplication : public binary_operation<df::op_group::DOUBLE> {
         double execute(double first, double second) override {
             return first * second;
+        }
+    };
+
+    struct sum : public binary_operation<df::op_group::INT>, public binary_operation<df::op_group::DOUBLE> {
+        int execute(int first, int second) override {
+            return first + second;
+        }
+
+        double execute(double first, double second) override {
+            return first + second;
         }
     };
 

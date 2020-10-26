@@ -1,17 +1,21 @@
+#include "operation/binary_operation.h"
 #include "boost/process.hpp"
-#include "demofuncs/demofuncs.h"
-#include "manager/manager.h"
+#include "function/demofuncs.h"
+#include "manager/basic_manager.h"
+#include "cancellator/periodic_cancellator.h"
 #include <string>
 namespace bp = boost::process;
 
+void basic_test() {
+    std::string exe_path = boost::filesystem::current_path().string() + R"(\function\function_manager\function_manager)";
+
+    basic_manager<spos::lab1::demo::op_group::INT> manager("f", "g", exe_path,
+                                                           new binary_operation::min(),
+                                                           new periodic_cancellator(15));
+    manager.run(0);
+}
+
 int main() {
-    auto exe_path = boost::filesystem::current_path();
-    auto proj_path = exe_path.parent_path();
-    std::string f_exe_path = proj_path.string() + "\\f_process\\cmake-build-release\\f";
-    std::string g_exe_path = proj_path.string() + "\\g_process\\cmake-build-release\\g";
-
-    manager<spos::lab1::demo::op_group::INT> manager(f_exe_path, g_exe_path);
-    manager.run(2);
-
+    basic_test();
     return 0;
 }

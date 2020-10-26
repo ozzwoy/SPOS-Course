@@ -11,5 +11,7 @@ find_package(Boost 1.74.0 REQUIRED)
 include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${PROJECT_SOURCE_DIR}/boost_1_74_0/stage/lib)
 
+add_subdirectory(${PROJECT_SOURCE_DIR}/function/function_manager)
+
 add_executable(${PROJECT_NAME} main.cpp)
 target_link_libraries(${PROJECT_NAME} ${Boost_LIBRARIES})

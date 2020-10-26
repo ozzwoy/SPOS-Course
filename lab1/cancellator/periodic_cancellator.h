@@ -8,11 +8,11 @@
 #include "cancellator.h"
 #include <chrono>
 #include <iostream>
-#include <process.h>
 #include <string>
 #include <thread>
 #include <WinUser.h>
 #include <xutility>
+using namespace std::chrono_literals;
 
 class periodic_cancellator : public cancellator {
 private:
@@ -22,36 +22,35 @@ private:
     bool _is_prompt_on;
     bool _is_cancelled;
     bool _is_off;
-    std::string message;
 
-    bool show_prompt() {
+    bool show_prompt(std::chrono::seconds const &time_passed) {
         int value;
 
-        system("cls");
         while (true) {
-            std::cout << "Please, choose one of the following options:" << std::endl <<
+            std::cout << std::endl << "[Time passed before prompt: " << time_passed.count() << "s]" << std::endl <<
+                      "Please, choose one of the following options:" << std::endl <<
                       "- enter 0 to stop computation" << std::endl <<
                       "- enter 1 to continue computation" << std::endl <<
                       "- enter 2 to continue computation without prompt" << std::endl <<
                       "Enter here: ";
             if (std::cin >> value) {
-                system("cls");
                 switch (value) {
                     case 0:
-                        std::cout << message;
                         return true;
                     case 1:
-                        std::cout << message;
+                        std::cout << std::endl << "Computation continued. Wait for result..." << std::endl;
                         return false;
                     case 2:
                         _is_prompt_disabled = true;
-                        std::cout << message;
+                        std::cout << std::endl << "Computation continued without prompt. Wait for result..." <<
+                                     std::endl;
                         return false;
                     default:
                         std::cout << "Wrong input! Try again." << std::endl << std::endl;
                 }
             } else {
-                system("cls");
+                std::cin.clear();
+                std::cin.ignore(100, '\n');
                 std::cout << "Wrong input! Try again." << std::endl << std::endl;
             }
         }
@@ -59,10 +58,12 @@ private:
 
     void run() {
         time_point prev_time, cur_time;
-        std::chrono::seconds time_passed{0};
+        std::chrono::seconds time_passed;
 
         while (true) {
             if (!_is_prompt_disabled) prev_time = std::chrono::system_clock::now();
+            time_passed = 0s;
+
             while (!_is_off && !(GetKeyState(VK_ESCAPE) & 0x8000)) {
                 if (!_is_prompt_disabled) {
                     if (time_passed < period) {
@@ -72,17 +73,27 @@ private:
                 }
             }
 
-            if (!_is_off || (!_is_prompt_disabled && show_prompt())) {
+            if (_is_off) return;
+            else if (!_is_prompt_disabled) {
+                _is_prompt_on = true;
+                if (show_prompt(time_passed)) {
+                    std::cout << std::endl << "Computation stopped." << std::endl;
+                    _is_prompt_on = false;
+                    _is_cancelled = true;
+                    return;
+                }
+                _is_prompt_on = false;
+            } else {
                 _is_cancelled = true;
+                std::cout << std::endl << "Computation stopped." << std::endl;
                 return;
             }
         }
     }
 
 public:
-    periodic_cancellator(std::chrono::seconds period, std::string post_prompt_message)
-        : period(period), message(std::move(post_prompt_message)), _is_prompt_disabled(false), _is_prompt_on(false),
-        _is_cancelled(false), _is_off(false) {}
+    explicit periodic_cancellator(unsigned long long period)
+        : period(period), _is_prompt_disabled(false), _is_prompt_on(false), _is_cancelled(false), _is_off(false) {}
 
     void start() override {
         auto th = std::thread(&periodic_cancellator::run, this);

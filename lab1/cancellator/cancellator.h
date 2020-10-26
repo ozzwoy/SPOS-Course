@@ -16,6 +16,8 @@ public:
     virtual bool is_cancelled() = 0;
 
     virtual void finish() = 0;
+
+    virtual ~cancellator() {}
 };
 
 #endif //SPOS_LAB_1_CANCELLATOR_H
