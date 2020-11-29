@@ -20,6 +20,7 @@ public class Scheduling {
   private static Vector processVector = new Vector();
   private static Results result = new Results("null","null",0);
   private static String resultsFile = "src/main/resources/Summary-Results";
+  private static String logFile = "src/main/resources/Summary-Processes";
 
   private static void Init(String file) {
     File f = new File(file);
@@ -70,6 +71,16 @@ public class Scheduling {
           StringTokenizer st = new StringTokenizer(line);
           st.nextToken();
           quantum = Common.s2i(st.nextToken());
+        }
+        if (line.startsWith("summary_file")) {
+          StringTokenizer st = new StringTokenizer(line);
+          st.nextToken();
+          resultsFile = "src/main/resources/" + st.nextToken();
+        }
+        if (line.startsWith("log_file")) {
+          StringTokenizer st = new StringTokenizer(line);
+          st.nextToken();
+          logFile = "src/main/resources/" + st.nextToken();
         }
       }
       in.close();
@@ -125,7 +136,7 @@ public class Scheduling {
         i++;
       }
     }
-    result = SchedulingAlgorithm.Run(runtime, quantum, processVector, result);
+    result = SchedulingAlgorithm.run(runtime, quantum, processVector, result, logFile);
     try {
       //BufferedWriter out = new BufferedWriter(new FileWriter(resultsFile));
       PrintStream out = new PrintStream(new FileOutputStream(resultsFile));
