@@ -1,4 +1,5 @@
-# Improvements implemented:
+# Guaranted Scheduling algorithm on a basis of MOSS Scheduling Simulator
+## Improvements implemented:
 - [x] Consider renaming the "Run()" method in SchedulingAlgorithm to "run()". By convention in java, method names begin with a lowercase letter. Also, add some internal documentation to SchedulingAlgorithm to facilitate understanding by students and instructors, and add external documentation regarding the implementation of new scheduling algorithms to this user guide.
 - [x] Consider adding a configuration parameter for "quantum" which specifies the number of milliseconds that a process is allowed to execute before being re-considered by the scheduling algorithm.
 - [x] Consider modifying the format of the Summary-Processes log file. The total cpu time for the process is repeated in the last column and should be eliminated. It would be nice if the total elapsed milliseconds (system clock) were present at the beginning of the line so that we can see when things happened exactly during the simulation. If we switch to the meanings of the various parameters as suggested above, we may want to rethink the overall format of the lines as well.
